@@ -455,9 +455,9 @@ def _add_dbg_wrapper(new_model, dm, tag, mode):
             else:
                 canary = (f"qkv_proj.forward_owner={owner} "
                           f"(BypassForwardHook => lora ACTIVE; else => BASE ONLY!)")
-            print(f"[H3TURBO fwd {tag}/{mode}] call#{st['n']}  {canary}  is_injected="
-                  f"{getattr(new_model, 'is_injected', '?')}  timestep={tsv:.2f}  "
-                  f"video_rms={vr:.4f} audio_rms={ar:.4f} dtype={dt}", flush=True)
+            # print(f"[H3TURBO fwd {tag}/{mode}] call#{st['n']}  {canary}  is_injected="
+            #       f"{getattr(new_model, 'is_injected', '?')}  timestep={tsv:.2f}  "
+            #       f"video_rms={vr:.4f} audio_rms={ar:.4f} dtype={dt}", flush=True)
         return executor(*args, **kwargs)
 
     new_model.add_wrapper_with_key(
