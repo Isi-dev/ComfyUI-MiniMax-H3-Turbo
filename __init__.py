@@ -115,17 +115,17 @@ def _turbo_sampler(model, x, sigmas, extra_args=None, callback=None, disable=Non
         # latent. Step the whole pack with a plain flow (Euler) update — the model
         # and ModelSamplingAV handle the audio clock. Manually re-shifting the audio
         # here (the legacy path below) would double-apply and corrupt the audio.
-        print(f"[H3TURBO sampler] native ModelSamplingAV -> single-schedule Euler  "
-              f"sigmas={[round(float(s),4) for s in sigmas]}  x.shape={tuple(x.shape)} "
-              f"dtype={x.dtype}", flush=True)
+        # print(f"[H3TURBO sampler] native ModelSamplingAV -> single-schedule Euler  "
+        #       f"sigmas={[round(float(s),4) for s in sigmas]}  x.shape={tuple(x.shape)} "
+        #       f"dtype={x.dtype}", flush=True)
         for i in trange(len(sigmas) - 1, disable=disable):
             sv, sv_n = float(sigmas[i]), float(sigmas[i + 1])
             denoised = model(x, sigmas[i] * s_in, **extra_args)
             d = (x - denoised) / sigmas[i]
             x = x + (sv_n - sv) * d
-            print(f"[H3TURBO step {i}] sv={sv:.4f}->{sv_n:.4f}  "
-                  f"denoised_rms={_rms(denoised):.4f} x_rms={_rms(x):.4f} d_rms={_rms(d):.4f}",
-                  flush=True)
+            # print(f"[H3TURBO step {i}] sv={sv:.4f}->{sv_n:.4f}  "
+            #       f"denoised_rms={_rms(denoised):.4f} x_rms={_rms(x):.4f} d_rms={_rms(d):.4f}",
+            #       flush=True)
             if callback is not None:
                 callback({"i": i, "denoised": denoised, "x": x,
                           "sigma": sigmas[i], "sigma_hat": sigmas[i]})
@@ -142,9 +142,9 @@ def _turbo_sampler(model, x, sigmas, extra_args=None, callback=None, disable=Non
             "(the EmptyMiniMaxH3LatentAV / MiniMaxH3ImageToVideo output).")
     v_numel = math.prod(shapes[0][1:])           # flat pack is [video | audio]
     a_numel = (x.shape[-1] - v_numel)
-    print(f"[H3TURBO sampler] legacy dual-schedule (no native ModelSamplingAV)  "
-          f"sigmas={[round(float(s),4) for s in sigmas]}  x.shape={tuple(x.shape)} "
-          f"dtype={x.dtype}  v_numel={v_numel} a_numel={a_numel}  shapes={shapes}", flush=True)
+    # print(f"[H3TURBO sampler] legacy dual-schedule (no native ModelSamplingAV)  "
+    #       f"sigmas={[round(float(s),4) for s in sigmas]}  x.shape={tuple(x.shape)} "
+    #       f"dtype={x.dtype}  v_numel={v_numel} a_numel={a_numel}  shapes={shapes}", flush=True)
     for i in trange(len(sigmas) - 1, disable=disable):   # tqdm it/s bar, like stock
         sv, sv_n = float(sigmas[i]), float(sigmas[i + 1])
         denoised = model(x, sigmas[i] * s_in, **extra_args)
@@ -155,9 +155,9 @@ def _turbo_sampler(model, x, sigmas, extra_args=None, callback=None, disable=Non
         sl = _audio_slope(max(sv, 1e-6))
         xa = xa + (_audio_sigma(sv_n) - _audio_sigma(sv)) * (oa / sl)  # audio clock
         x = torch.cat([xv, xa], dim=-1)
-        print(f"[H3TURBO step {i}] sv={sv:.4f}->{sv_n:.4f}  denoised_rms={_rms(denoised):.4f}  "
-              f"video: x_rms={_rms(xv):.4f} v_rms={_rms(ov):.4f}  "
-              f"audio: x_rms={_rms(xa):.4f} v_rms={_rms(oa):.4f} slope={sl:.4f}", flush=True)
+        # print(f"[H3TURBO step {i}] sv={sv:.4f}->{sv_n:.4f}  denoised_rms={_rms(denoised):.4f}  "
+        #       f"video: x_rms={_rms(xv):.4f} v_rms={_rms(ov):.4f}  "
+        #       f"audio: x_rms={_rms(xa):.4f} v_rms={_rms(oa):.4f} slope={sl:.4f}", flush=True)
         if callback is not None:
             callback({"i": i, "denoised": denoised, "x": x,
                       "sigma": sigmas[i], "sigma_hat": sigmas[i]})
@@ -535,10 +535,10 @@ class MiniMaxH3TurboLoRA:
             if n_fc2:
                 detail += f", {n_fc2} int8 fc2 via merge"
         extra = f" + {len(adaln)} adaln injected at run time" if adaln else ""
-        print(f"[MiniMaxH3TurboLoRA] {'pruned' if pruned else 'full'} base [{mode}]: "
-              f"lora={lora_name} strength={strength} | {len(backbone)} backbone "
-              f"modules, {detail}{extra} | model={type(new_model.model).__name__} "
-              f"weight_dtype={wdt} weight_dev={wdev}", flush=True)
+        # print(f"[MiniMaxH3TurboLoRA] {'pruned' if pruned else 'full'} base [{mode}]: "
+        #       f"lora={lora_name} strength={strength} | {len(backbone)} backbone "
+        #       f"modules, {detail}{extra} | model={type(new_model.model).__name__} "
+        #       f"weight_dtype={wdt} weight_dev={wdev}", flush=True)
         _add_dbg_wrapper(new_model, dm, "pruned" if pruned else "full", mode)
         return (new_model,)
 
